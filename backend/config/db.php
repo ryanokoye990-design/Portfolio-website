@@ -1,9 +1,9 @@
 <?php
 // Database configuration
-define('DB_HOST', 'localhost');
-define('DB_USER', 'root');
-define('DB_PASSWORD', '');
-define('DB_NAME', 'portfolio_db');
+define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
+define('DB_USER', getenv('DB_USER') ?: 'root');
+define('DB_PASSWORD', getenv('DB_PASSWORD') ?: '');
+define('DB_NAME', getenv('DB_NAME') ?: 'portfolio_db');
 
 /**
  * Get database connection
@@ -17,7 +17,9 @@ function getDBConnection() {
 
         // Check connection
         if ($connection->connect_error) {
-            die('Connection failed: ' . $connection->connect_error);
+            // Log error securely instead of exposing it
+            error_log('Database connection failed: ' . $connection->connect_error);
+            die(json_encode(['error' => 'Database connection failed. Please try again later.']));
         }
 
         // Set charset to utf8mb4
@@ -25,5 +27,15 @@ function getDBConnection() {
     }
 
     return $connection;
+}
+
+/**
+ * Close database connection
+ */
+function closeDBConnection() {
+    global $connection;
+    if ($connection !== null) {
+        $connection->close();
+    }
 }
 ?>
